@@ -2,25 +2,10 @@
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
 const fs = require('fs');
+const console_table = require('console.table');
 
-// connection.query(
-//     'SELECT * FROM `table` WHERE `name` = "Page" AND `age` > 45',
-//     function(err, results, fields) {
-//       console.log(results); // results contains rows returned by server
-//       console.log(fields); // fields contains extra meta data about results, if available
-//     }
-//   );
-
-//   const userOptions = ({ start_options }) => {
-//     console.log("Working!");
-
-//     console.log(`${start_options}`);
-// }
-
-
-// Steps to Success
 // Create Options for User to choose: View Departments, View Roles, View Employees, Add Deparment, Add Role, Add Employee, Update Employee Role
-const userPrompt = inquirer.prompt([
+inquirer.prompt([
     {
         name: "start_options",
         type: "list",
@@ -34,27 +19,23 @@ const userPrompt = inquirer.prompt([
     const choice = `${data.start_options}`;
 
     console.log(choice)
+
+    const connection = mysql.createConnection({
+        host: 'localhost',
+        user: 'root',
+        database: 'employee_db',
+        password: 'codingisfun97'
+      });
     // console.log(choice === "View Departments")
     // If user chooses "View Departments"
     if(choice === "View Departments") {
-        const connection = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            database: 'employee_db',
-            password: 'codingisfun97'
-          });
-
-        console.log("View Departments!!!");
-        // Goal: Display table showing department names and department ids
-        // const sql = `SELECT department.id, department.name FROM department.INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';`;
-        const sql = `SELECT * FROM department;`;
-        // console.log(sql);
-        connection.query(sql,
+        // Display table showing department names and department ids
+        
+        // Connect to sql to get data from department table
+        connection.query(`SELECT department.id AS Id, department.dep_name AS Name FROM department;`,
         function(err, results) {
             console.table(results); // results contains rows returned by server
-    }
-    
-  );
+        });
 
     // const propertyValues = Object.values(person);
 
@@ -63,19 +44,73 @@ const userPrompt = inquirer.prompt([
     } 
     // If user chooses "View Roles"
     if(choice === "View Roles") {
-        console.log("View Roles!!!")
+        // const sql = `SELECT * FROM roles;`;
+
+        connection.query(`SELECT roles.id AS id, roles.title AS title, department.dep_name AS department, roles.salary AS salary
+        FROM roles 
+        JOIN employee_db.department ON roles.department_id = department.id;`,
+            function(err, results) {
+                console.table(results); // results contains rows returned by server
+            });
     } 
     // If user chooses "View Employees"
     if(choice === "View Employees") {
-        console.log("View Employees!!!")
+        connection.query(`SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name AS last_name, roles.title AS role, department.dep_name AS department, roles.salary AS salary
+        FROM employee 
+        INNER JOIN employee_db.roles ON employee.role_id = roles.id
+        INNER JOIN employee_db.department ON roles.department_id = department.id;`,
+            function(err, results) {
+                console.table(results); // results contains rows returned by server
+            });
     }
     // If user chooses "Add Department" 
     if(choice === "Add Department") {
-        console.log("Add Department!!!")
+        // Prompt user to enter a department
+        inquirer.prompt([
+            {
+                type: "input",
+                name: "newDepartment",
+                message: "Enter new department name."
+            }
+        ]).then(data => {
+            // Add to database
+            connection.query(`INSERT INTO department (dep_name)
+            VALUES (?)`, `${data.newDepartment}`, 
+            function(err, results) {
+            console.log("Added to Department List.");
+        });
+        })
+
     }
     // If user chooses "Add Role"
     if(choice === "Add Role") {
-        console.log("Add Role!!!")
+        inquirer.prompt([
+            {
+                type: "input",
+                name: "newRole",
+                message: "Enter new role name."
+            },
+
+            {
+                type: "input",
+                name: "newSalary",
+                message: "Enter new role salary."
+            },
+
+            {
+                type: "input",
+                name: "newDepartment",
+                message: "Enter new role department number (1-Engineering, 2-Finance, 3-Legal, 4-Sales)"
+            }
+        ]).then(data => {
+            // Add to database
+            prompt = [`${data.newRole}, ${data.newSalary}, ${data.newDepartment}`]
+            connection.query(`INSERT INTO roles (title, salary, department_id)
+            VALUES (?)`, prompt, 
+            function(err, results) {
+            console.log(results);
+        });
+        })
     }
     // If user chooses "Add Employee"
     if(choice === "Add Employee") {
