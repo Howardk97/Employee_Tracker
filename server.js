@@ -30,6 +30,7 @@ const userPrompt = inquirer.prompt([
     }
 ])
 .then((data) => {
+
     const choice = `${data.start_options}`;
 
     console.log(choice)
@@ -45,11 +46,12 @@ const userPrompt = inquirer.prompt([
 
         console.log("View Departments!!!");
         // Goal: Display table showing department names and department ids
-        const sql = 'SELECT department.id, department.name FROM department;';
+        // const sql = `SELECT department.id, department.name FROM department.INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE';`;
+        const sql = `SELECT * FROM department;`;
         // console.log(sql);
         connection.query(sql,
         function(err, results) {
-            console.log(results); // results contains rows returned by server
+            console.table(results); // results contains rows returned by server
     }
     
   );
@@ -72,7 +74,7 @@ const userPrompt = inquirer.prompt([
         console.log("Add Department!!!")
     }
     // If user chooses "Add Role"
-    if(choice ==="Add Role") {
+    if(choice === "Add Role") {
         console.log("Add Role!!!")
     }
     // If user chooses "Add Employee"
