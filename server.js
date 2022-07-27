@@ -5,7 +5,7 @@ const fs = require('fs');
 const console_table = require('console.table');
 
 // Create Options for User to choose: View Departments, View Roles, View Employees, Add Deparment, Add Role, Add Employee, Update Employee Role
-inquirer.prompt([
+const startPrompt = inquirer.prompt([
     {
         name: "start_options",
         type: "list",
@@ -34,7 +34,7 @@ inquirer.prompt([
         // Connect to sql to get data from department table
         connection.query(`SELECT department.id AS Id, department.dep_name AS Name FROM department;`,
         function(err, results) {
-            console.table(results); // results contains rows returned by server
+            console.table(results);
         });
 
     // const propertyValues = Object.values(person);
@@ -61,7 +61,7 @@ inquirer.prompt([
         INNER JOIN employee_db.department ON roles.department_id = department.id;`,
             function(err, results) {
                 console.table(results); // results contains rows returned by server
-            });
+        });
     }
     // If user chooses "Add Department" 
     if(choice === "Add Department") {
@@ -100,21 +100,76 @@ inquirer.prompt([
             {
                 type: "input",
                 name: "newDepartment",
-                message: "Enter new role department number (1-Engineering, 2-Finance, 3-Legal, 4-Sales)"
+                message: "Enter new role department number."
             }
         ]).then(data => {
             // Add to database
-            prompt = [`${data.newRole}, ${data.newSalary}, ${data.newDepartment}`]
-            connection.query(`INSERT INTO roles (title, salary, department_id)
-            VALUES (?)`, prompt, 
+            // prompt = [`${data.newRole}`, `${data.newSalary}`, `${data.newDepartment}`]
+            connection.query(`INSERT INTO department (dep_name)
+            VALUES (?)`, [`${data.newDepartment}`], 
             function(err, results) {
             console.log(results);
-        });
+            });
+
+            connection.query(`INSERT INTO roles (title, salary, department_id)
+            VALUES (?)`, [`${data.newRole}`, `${data.newSalary}`, 1], 
+            function(err, results) {
+            console.log(results);
+            });
+
+            // connection.query(`INSERT INTO roles (title, salary, department_id)
+            // VALUES (?)`, [`${data.newRole}`, `${data.newSalary}`, `${data.newDepartment}`], 
+            // function(err, results) {
+            // console.log(results);
+            // });
+        
+        // If department entry is already in table
+            // Do nothing
+        // Else
+            // Add to department table
+        //     connection.query(`INSERT INTO department (dep_name)
+        //     VALUES (?)`, `${data.newDepartment}`, 
+        //     function(err, results) {
+        //     console.log("Added to Department List.");
+        // });
+
+        // If 
         })
     }
     // If user chooses "Add Employee"
     if(choice === "Add Employee") {
         console.log("Add Employee!!!")
+        inquirer.prompt([
+            {
+                type: "input",
+                name: "first_name",
+                message: "Enter the employee's first name."
+            },
+
+            {
+                type: "input",
+                name: "last_name",
+                message: "Enter the employee's last name."
+            },
+
+            {
+                type: "input",
+                name: "role",
+                message: "Enter the employee's job role."
+            },
+
+            {
+                type: "input",
+                name: "manager",
+                message: "Enter the employee's manager."
+            },
+        ]).then((data) => {
+            connection.query(`INSERT INTO employee (first_name, last_name, role_id)
+            VALUES (?)`, [`${first_name}`, `${last_name}`, `$`], 
+            function(err, results) {
+            console.log(results);
+            });
+        })
     }
     // If user chooses "Update Employee Role"
     if(choice === "Update Employee Role") {
