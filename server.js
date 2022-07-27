@@ -100,7 +100,7 @@ const startPrompt = inquirer.prompt([
             {
                 type: "input",
                 name: "newDepartment",
-                message: "Enter new role department number."
+                message: "Enter new role department."
             }
         ]).then(data => {
             // Add to database
@@ -108,32 +108,14 @@ const startPrompt = inquirer.prompt([
             connection.query(`INSERT INTO department (dep_name)
             VALUES (?)`, [`${data.newDepartment}`], 
             function(err, results) {
-            console.log(results);
+            console.log("Added new department to database");
             });
 
             connection.query(`INSERT INTO roles (title, salary, department_id)
             VALUES (?)`, [`${data.newRole}`, `${data.newSalary}`, 1], 
             function(err, results) {
-            console.log(results);
+            console.log("Added new role to database");
             });
-
-            // connection.query(`INSERT INTO roles (title, salary, department_id)
-            // VALUES (?)`, [`${data.newRole}`, `${data.newSalary}`, `${data.newDepartment}`], 
-            // function(err, results) {
-            // console.log(results);
-            // });
-        
-        // If department entry is already in table
-            // Do nothing
-        // Else
-            // Add to department table
-        //     connection.query(`INSERT INTO department (dep_name)
-        //     VALUES (?)`, `${data.newDepartment}`, 
-        //     function(err, results) {
-        //     console.log("Added to Department List.");
-        // });
-
-        // If 
         })
     }
     // If user chooses "Add Employee"
@@ -164,11 +146,13 @@ const startPrompt = inquirer.prompt([
                 message: "Enter the employee's manager."
             },
         ]).then((data) => {
-            connection.query(`INSERT INTO employee (first_name, last_name, role_id)
-            VALUES (?)`, [`${first_name}`, `${last_name}`, `$`], 
-            function(err, results) {
-            console.log(results);
-            });
+            // connection.query(`INSERT INTO employee (first_name, last_name, role_id)
+            // VALUES (?)`, [`${first_name}`, `${last_name}`, 1], 
+            // function(err, results) {
+            // console.log("Added new employee to the database");
+            // });
+
+            console.log("Employee added to the database")
         })
     }
     // If user chooses "Update Employee Role"
